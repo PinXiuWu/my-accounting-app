@@ -203,7 +203,10 @@ function showStatus(msg, isError = false) {
 async function fetchRecords() {
     try {
         document.getElementById('recordsContainer').innerHTML = `<div class="text-center text-xs text-slate-400 font-bold py-10">讀取中...</div>`;
-        const res = await fetch(GAS_URL);
+        const res = await fetch(GAS_URL + "?t=" + new Date().getTime(), { 
+            method: 'GET',
+            redirect: 'follow' 
+        });
         allRecords = await res.json();
         renderApp();
     } catch (e) {
