@@ -1,11 +1,11 @@
 // 1. 設定 Google 後台連線網址
-const GAS_URL = "https://google.com";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxXry9UVvQIrdZq63_2xSXizF36e2DJdHwF6Ehp79-VxYUGG0kdcqoijm_KQofibR9HNg/exec";
 
 // 預設分類選單
 const CATEGORIES = {
-    expense: ["餐飲食品", "交通出行", "休閒娛樂", "日常用品", "居住物業", "醫療保健"],
-    income: ["薪資收入", "獎金收益", "投資理財", "副業外快"],
-    transfer: ["銀行轉帳", "現金提存"]
+    expense: ["飲食", "交通", "服飾", "住家", "學習", "休閒娛樂", "購物", "醫療"],
+    income: ["薪資", "股息", "利息", "副業", "獎金", "中獎", "投資獲利", "退貨", "保險"    ],
+    transfer: ["帳戶戶轉", "繳信用卡費", "代墊"]
 };
 
 // 儲存目前所有帳務資料
@@ -117,7 +117,7 @@ function showStatus(msg, isError = false) {
 // 從 Google 試算表抓取歷史紀錄 (GET)
 async function fetchRecords() {
     try {
-        document.getElementById('recordsContainer').innerHTML = `<div class="text-center text-xs text-slate-400 font-bold py-10">資料讀取中...</div>`;
+        document.getElementById('recordsContainer').innerHTML = `<div class="text-center text-xs text-slate-400 font-bold py-10">讀取中...</div>`;
         const res = await fetch(GAS_URL);
         allRecords = await res.json();
         renderApp();
@@ -140,7 +140,7 @@ async function handleFormSubmit(e) {
     } catch(err) {}
 
     if (isNaN(finalAmount) || finalAmount <= 0) {
-        showStatus("請輸入正確的金額", true);
+        showStatus("請輸入正確金額", true);
         return;
     }
 
@@ -152,7 +152,7 @@ async function handleFormSubmit(e) {
         type: document.getElementById('txType').value
     };
 
-    showStatus("正在即時同步資料至 Google 試算表...");
+    showStatus("正同步至 Google 試算表...");
     
     try {
         // 使用 text/plain 技術繞過瀏覽器 CORS 安全限制問題
@@ -164,7 +164,7 @@ async function handleFormSubmit(e) {
         
         const result = await response.json();
         if (result.status === "success") {
-            showStatus("🎉 記帳成功！已安全儲存至雲端");
+            showStatus(" 記帳成功！已安全儲存至雲端");
             // 表單重設
             document.getElementById('txDesc').value = "";
             document.getElementById('txAmount').value = "";
