@@ -203,15 +203,19 @@ function showStatus(msg, isError = false) {
 async function fetchRecords() {
     try {
         document.getElementById('recordsContainer').innerHTML = `<div class="text-center text-xs text-slate-400 font-bold py-10">讀取中...</div>`;
-        const res = await fetch(GAS_URL + "?t=" + new Date().getTime(), { 
-            method: 'GET',
-            redirect: 'follow' 
-        });
-        allRecords = await res.json();
+        const url = GAS_URL.includes('?') ? GAS_URL + "&t=" + Date.now() : GAS_URL + "?t=" + Date.now();
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+        const text = await res.text();
+        
+        try {
+            allRecords = JSON.parse(text);
+        } catch (parseErr) {
+            document.getElementById('recordsContainer').innerHTML = `<div class="text-center text-xs py-10 text-rose-500">API 權限錯誤：瀏覽器被強制導向 Google 登入頁面，請確認 GAS 存取權限為「所有人」且已發布新版本。</div>`;
+            return;
+        }
         renderApp();
     } catch (e) {
-        showStatus("無法同步雲端資料庫，請檢查網路或 GAS 設定", true);
-        document.getElementById('recordsContainer').innerHTML = `<div class="text-center text-xs text-rose-400 font-bold py-10">讀取失敗</div>`;
+        document.getElementById('recordsContainer').innerHTML = `<div class="text-center text-xs text-rose-400 font-bold py-10">連線失敗，請檢查網址與網路</div>`;
     }
 }
 
@@ -266,7 +270,7 @@ function renderApp() {
     const container = document.getElementById('recordsContainer');
     if (!container) return;
 
-    const filteredRecords = allRecords.filter(r => r.type === currentTab);
+    const filteredRecords = allRecords.filter(r => String(r.type || 'expense').trim() === currentTab);
 
     let tabTotal = 0;
     filteredRecords.forEach(r => {
@@ -286,21 +290,18 @@ function renderApp() {
     document.getElementById('itemsCountText').innerText = `本月共 ${filteredRecords.length} 筆${tabName}明細`;
 
     if (filteredRecords.length === 0) {
-        container.innerHTML = `
-            <div class="text-center py-12 text-slate-400">
-                <p class="text-sm">目前沒有任何${tabName}紀錄</p>
-            </div>
-        `;
+        container.innerHTML = `<div class="text-center py-12 text-slate-400"><p class="text-sm">目前沒有任何${tabName}紀錄</p></div>`;
         return;
     }
 
     container.innerHTML = filteredRecords.map(r => {
-        const isInc = r.type === 'income';
-        const isTfr = r.type === 'transfer';
+        const typeStr = String(r.type || 'expense').trim();
+        const isInc = typeStr === 'income';
+        const isTfr = typeStr === 'transfer';
         const colorClass = isInc ? 'text-emerald-600' : isTfr ? 'text-blue-600' : 'text-rose-600';
         const sign = isInc ? '+' : isTfr ? '' : '-';
         
-        const cleanDate = r.date ? r.date.split('T')[0] : '';
+        const cleanDate = r.date ? String(r.date).split('T')[0] : '';
         
         return `
             <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center transition-all hover:border-slate-200">
