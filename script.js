@@ -1,5 +1,5 @@
 // 1. 設定 Google 後台連線網址
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzDNoJ-mvlzHjOB-Q-A5HSez9Qt6thMUlZ1NhBMc59y/dev";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxXry9UVvQIrdZq63_2xSXizF36e2DJdHwF6Ehp79-VxYUGG0kdcqoijm_KQofibR9HNg/exec";
 
 // 預設分類選單
 const CATEGORIES = {
