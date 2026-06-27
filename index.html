@@ -52,7 +52,16 @@
                         <div id="categorySummaryList" class="space-y-5 mt-4"></div>
                     </div>
                 </div>
-
+                <div class="space-y-2">
+                    <label class="text-xs font-black text-slate-500">掃描帳單</label>
+                    <div class="flex gap-2">
+                        <input type="file" id="pdfUpload" accept=".pdf" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100" />
+                        <button type="button" id="aiScanBtn" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-black shadow-md transition-all active:scale-95">
+                            AI 辨識
+                        </button>
+                    </div>
+                    <div id="aiStatus" class="hidden text-[10px] font-bold text-violet-600 animate-pulse">辨識帳單中</div>
+                </div>
                 <!-- 手動記帳表單卡片 -->
                 <div class="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm overflow-hidden">
                     <button id="toggleFormBtn" class="w-full p-5 flex justify-between items-center text-sm font-bold hover:bg-slate-50 transition-colors">
