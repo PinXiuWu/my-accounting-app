@@ -1,21 +1,16 @@
-
-
-
 // 1. 設定 Google 後台連線網址
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxXry9UVvQIrdZq63_2xSXizF36e2DJdHwF6Ehp79-VxYUGG0kdcqoijm_KQofibR9HNg/exec";
 
 // 預設分類選單
 const CATEGORIES = {
     expense: ["飲食", "交通", "服飾", "住家", "學習", "休閒娛樂", "購物", "醫療"],
-    income: ["薪資", "股息", "利息", "副業", "獎金", "中獎", "投資獲利", "退貨", "保險"    ],
+    income: ["薪資", "股息", "利息", "副業", "獎金", "中獎", "投資獲利", "退貨", "保險"],
     transfer: ["帳戶戶轉", "繳信用卡費", "代墊"]
 };
 
-
-
 // 儲存目前所有帳務資料
 let allRecords = [];
-let currentTab = 'expense'; // ← 新增這行在第 11 行，預設為支出分頁
+let currentTab = 'expense'; // 預設為支出分頁
 
 // 網頁初始化載入
 window.addEventListener('DOMContentLoaded', () => {
@@ -83,7 +78,7 @@ function initApp() {
     document.getElementById('transactionForm').addEventListener('submit', handleFormSubmit);
 
     // ==========================================
-    // 1. 分頁切換事件 (先前步驟新增)
+    // 1. 分頁切換事件
     // ==========================================
     const tabIncome = document.getElementById('tabIncome');
     const tabExpense = document.getElementById('tabExpense');
@@ -111,7 +106,7 @@ function initApp() {
     }
 
     // ==========================================
-    // 2. AI 掃描 PDF 事件 (此步驟精確加入位置)
+    // 2. AI 掃描 PDF 事件
     // ==========================================
     const aiScanBtn = document.getElementById('aiScanBtn');
     const pdfUpload = document.getElementById('pdfUpload');
@@ -165,35 +160,7 @@ function initApp() {
             reader.readAsDataURL(file);
         });
     }
-
-} // ← 確保最後這個 initApp 的結束大括號完好留在最底下
-    // ↓ 新增以下這段在第 43 行開始
-    const tabIncome = document.getElementById('tabIncome');
-    const tabExpense = document.getElementById('tabExpense');
-
-    tabIncome.addEventListener('click', () => {
-        currentTab = 'income';
-        updateTabStyles();
-        renderApp();
-    });
-
-    tabExpense.addEventListener('click', () => {
-        currentTab = 'expense';
-        updateTabStyles();
-        renderApp();
-    });
-
-    function updateTabStyles() {
-        if (currentTab === 'income') {
-            tabIncome.className = "flex-1 py-4 transition-all border-b-2 border-emerald-500 text-emerald-600 bg-emerald-50/30";
-            tabExpense.className = "flex-1 py-4 transition-all border-b-2 border-transparent text-slate-400";
-        } else {
-            tabExpense.className = "flex-1 py-4 transition-all border-b-2 border-rose-500 text-rose-600 bg-rose-50/30";
-            tabIncome.className = "flex-1 py-4 transition-all border-b-2 border-transparent text-slate-400";
-        }
-    }
-    // ↑ 新增結束
-
+}
 
 // 更新按鈕樣式
 function updateTypeButtons(activeType, btns) {
@@ -249,7 +216,6 @@ async function fetchRecords() {
 async function handleFormSubmit(e) {
     e.preventDefault();
     
-    // 解析金額 (如果輸入 100+50 自動算好數值)
     let amountStr = document.getElementById('txAmount').value.trim();
     let finalAmount = parseFloat(amountStr);
     try {
@@ -273,7 +239,6 @@ async function handleFormSubmit(e) {
     showStatus("正同步至 Google 試算表...");
     
     try {
-        // 使用 text/plain 技術繞過瀏覽器 CORS 安全限制問題
         const response = await fetch(GAS_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -283,11 +248,9 @@ async function handleFormSubmit(e) {
         const result = await response.json();
         if (result.status === "success") {
             showStatus(" 記帳成功！已安全儲存至雲端");
-            // 表單重設
             document.getElementById('txDesc').value = "";
             document.getElementById('txAmount').value = "";
             document.getElementById('calcPreview').classList.add('hidden');
-            // 重新載入最新帳目明細
             fetchRecords();
         }
     } catch (err) {
@@ -295,24 +258,19 @@ async function handleFormSubmit(e) {
     }
 }
 
-// 計算並將資料畫在手機網頁畫面上
 // 渲染畫面與資料計算
 function renderApp() {
     const container = document.getElementById('recordsContainer');
     if (!container) return;
 
-    // 1. 根據目前選擇的分頁 (currentTab: 'expense' 或 'income') 過濾資料
     const filteredRecords = allRecords.filter(r => r.type === currentTab);
 
-    // 2. 計算該分頁的總金額
     let tabTotal = 0;
     filteredRecords.forEach(r => {
         const amt = parseFloat(r.amount) || 0;
         tabTotal += amt;
     });
 
-    // 3. 更新上方總和顯示
-    // 如果是收入分頁，就更新 totalIncome 並將 expense 歸零，反之亦然
     if (currentTab === 'income') {
         document.getElementById('totalIncome').innerText = `$${tabTotal.toLocaleString()}`;
         document.getElementById('totalExpense').innerText = `$0`;
@@ -321,11 +279,9 @@ function renderApp() {
         document.getElementById('totalIncome').innerText = `$0`;
     }
 
-    // 更新當前分頁的總筆數
     const tabName = currentTab === 'income' ? '收入' : '支出';
     document.getElementById('itemsCountText').innerText = `本月共 ${filteredRecords.length} 筆${tabName}明細`;
 
-    // 4. 如果沒有資料，顯示客製化提示
     if (filteredRecords.length === 0) {
         container.innerHTML = `
             <div class="text-center py-12 text-slate-400">
@@ -335,14 +291,12 @@ function renderApp() {
         return;
     }
 
-    // 5. 生成卡片清單 HTML（並修正 ISO 日期時間戳記問題）
     container.innerHTML = filteredRecords.map(r => {
         const isInc = r.type === 'income';
         const isTfr = r.type === 'transfer';
         const colorClass = isInc ? 'text-emerald-600' : isTfr ? 'text-blue-600' : 'text-rose-600';
         const sign = isInc ? '+' : isTfr ? '' : '-';
         
-        // 修正 T16:00:00.000Z 格式，只切取前 10 個字元 (YYYY-MM-DD)
         const cleanDate = r.date ? r.date.split('T')[0] : '';
         
         return `
